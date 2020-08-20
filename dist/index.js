@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
+/******/ 		return __webpack_require__(932);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -49,10 +49,10 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
-/***/ 104:
+/***/ 932:
 /***/ (function() {
 
-alert("Hello, World!");
+console.log("Hello, World!");
 
 /***/ })
 
