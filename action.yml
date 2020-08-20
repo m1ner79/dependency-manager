@@ -1,0 +1,12 @@
+name : 'Bump Version In Dependants'
+description: 'This action bumps version of your Node.js package in its dependants'
+inputs:
+  github_token:
+    description: 'Token to use GitHub API. If not provided then the default token will be used.'
+    required: false
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'hash'
+  color: 'blue'
