@@ -4,9 +4,18 @@
   "description": "This action updates dependencies within the repositories.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "package": "ncc build index.js -o dist"
+    "start": "node index.js",
+    "package": "ncc build index.js -o dist",
+    "gitAdd": "git add dist/index.js",
+    "gen-readme-toc": "markdown-toc -i README.md",
+    "lint": "eslint .",
+    "lint-fix": "eslint --fix .",
+    "test": "npm run lint && jest"
   },
+  "pre-commit": [
+    "package",
+    "gitAdd"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/m1ner79/dependency_manager.git"
@@ -23,6 +32,11 @@
     "markdown-toc": "^1.2.0"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.22.3"
+    "@zeit/ncc": "^0.22.3",
+    "eslint": "^7.7.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-sonarjs": "^0.5.0",
+    "jest": "^26.4.1",
+    "pre-commit": "^1.2.2"
   }
 }
