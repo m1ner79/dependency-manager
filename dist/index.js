@@ -5856,23 +5856,30 @@ const core = __webpack_require__(186);
 
 async function run() {
   const gitHubKey = process.env.GITHUB_TOKEN || core.getInput('github_token', { required: true });
-  const octokit = github.getOctokit(gitHubKey);
-  //const query = "user%3Am1ner79+m1ner_test_package&type=Code";
-  const query1 = '"asyncapi/html-template" in:file';
+  const user = process.env.GH_USER || core.getInput('user');
 
-  // const { data: pullRequest } = await octokit.pulls.get({
-  //     owner: 'octokit',
-  //     repo: 'rest.js',
-  //     pull_number: 123,
-  //     mediaType: {
-  //       format: 'diff'
-  //     }
-  // });
-  const response = await octokit.search.code({
-    q: query1
+  //use below if action should work for organisation
+  const org = process.env.GH_ORG || core.getInput('org');
+
+  const package = process.env.PACKAGE || core.getInput('package', { required: true });
+
+  const octokit = github.getOctokit(gitHubKey);
+
+  let scope = '';
+  
+  if (user) {
+    scope = `user:${user}`;
+  } else if (org) {
+    scope = `org:${org}`;
+  } 
+
+  const query = (`"${package}" ${scope} in:file`);
+
+  const {data: res} = await octokit.search.repos({
+    q: query
   });
 
-  console.log(response);
+  console.log(res.total_count);
 }
 
 run();
