@@ -1,5 +1,27 @@
 const github = require('@actions/github');
 const core = require('@actions/core');
+const path = require('path');
+const simpleGit = require('simple-git');
+
+async function clone(remote, dir, git) {
+  try {
+    return await git
+      .silent(true)
+      .clone(remote, dir, {'--depth': 1});
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function createBranch(branchName, git) {
+  try {
+    return await git
+      .silent(true)
+      .checkout(`-b ${branchName}`);
+  } catch (e) {
+    throw e;
+  }
+}
 
 async function run() {
   const gitHubKey = process.env.GITHUB_TOKEN || core.getInput('github_token', { required: true });
@@ -25,8 +47,16 @@ async function run() {
   const {data: res} = await octokit.search.repos({
     q: query
   });
+  //items.name  items.html_url
+  //console.log(res.items);
 
-  console.log(res.total_count);
+  for (const item of res.items) {
+    const dir = path.join(process.cwd(), '../clones', item.name);
+    const branch = 'bump-dependancy';
+    const git = simpleGit();
+    await clone(item.html_url, dir, git);
+    await createBranch(branch, git);
+  }
 }
 
 run();
