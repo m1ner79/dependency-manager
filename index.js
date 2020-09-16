@@ -2,6 +2,7 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 const path = require('path');
 const simpleGit = require('simple-git');
+const {mkdir} = require('fs').promises;
 
 async function clone(remote, dir, git) {
   try {
@@ -17,7 +18,7 @@ async function createBranch(branchName, git) {
   try {
     return await git
       .silent(true)
-      .checkout(`-b ${branchName}`);
+      .checkout(`-b${branchName}`);
   } catch (e) {
     throw e;
   }
@@ -52,8 +53,10 @@ async function run() {
 
   for (const item of res.items) {
     const dir = path.join(process.cwd(), '../clones', item.name);
-    const branch = 'bump-dependancy';
-    const git = simpleGit();
+    await mkdir(dir, { recursive: true });
+    const branch = 'bump';
+    const options = {baseDir: dir};
+    const git = simpleGit(options);
     await clone(item.html_url, dir, git);
     await createBranch(branch, git);
   }

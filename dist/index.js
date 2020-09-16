@@ -10076,6 +10076,7 @@ const github = __webpack_require__(438);
 const core = __webpack_require__(186);
 const path = __webpack_require__(622);
 const simpleGit = __webpack_require__(477);
+const {mkdir} = __webpack_require__(747).promises;
 
 async function clone(remote, dir, git) {
   try {
@@ -10091,7 +10092,7 @@ async function createBranch(branchName, git) {
   try {
     return await git
       .silent(true)
-      .checkout(`-b ${branchName}`);
+      .checkout(`-b${branchName}`);
   } catch (e) {
     throw e;
   }
@@ -10126,8 +10127,10 @@ async function run() {
 
   for (const item of res.items) {
     const dir = path.join(process.cwd(), '../clones', item.name);
-    const branch = 'bump-dependancy';
-    const git = simpleGit();
+    await mkdir(dir, { recursive: true });
+    const branch = 'bump';
+    const options = {baseDir: dir};
+    const git = simpleGit(options);
     await clone(item.html_url, dir, git);
     await createBranch(branch, git);
   }
