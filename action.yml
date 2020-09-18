@@ -13,6 +13,9 @@ inputs:
   org:
     description: 'Organization of the authenticated user'
     required: false
+  ignore:
+    description: 'List of paths to package.json that should be ignored'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

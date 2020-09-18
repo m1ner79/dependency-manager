@@ -2,7 +2,8 @@ const github = require('@actions/github');
 const core = require('@actions/core');
 const path = require('path');
 const simpleGit = require('simple-git');
-const {mkdir} = require('fs').promises;
+const {mkdir, readFile} = require('fs').promises;
+const klaw = require('klaw');
 
 async function clone(remote, dir, git) {
   try {
@@ -33,6 +34,8 @@ async function run() {
 
   const package = process.env.PACKAGE || core.getInput('package', { required: true });
 
+  const ignore = process.env.IGNORE|| core.getInput('ignore');
+
   const octokit = github.getOctokit(gitHubKey);
 
   let scope = '';
@@ -48,18 +51,37 @@ async function run() {
   const {data: res} = await octokit.search.repos({
     q: query
   });
-  //items.name  items.html_url
-  //console.log(res.items);
 
   for (const item of res.items) {
-    const dir = path.join(process.cwd(), '../clones', item.name);
+    const dir = path.join(process.cwd(), './clones', item.name);
     await mkdir(dir, { recursive: true });
     const branch = 'bump';
     const options = {baseDir: dir};
     const git = simpleGit(options);
     await clone(item.html_url, dir, git);
     await createBranch(branch, git);
+
+    for await (const file of klaw(dir)) {
+      if (file.path.endsWith('package.json') && !isPathIgnored(file.path, ignore)) {
+        const packageJson = await readPackageJson(file.path,item.name);
+        console.log(packageJson);
+      }
+    }
   }
+}
+async function readPackageJson(path, repoName) {
+  try {
+    return JSON.parse(
+      await readFile(path, 'utf8')
+    );
+  } catch (error) {
+    console.error(`Problems with ${path} in ${repoName} repository`, error.message);
+  }
+}
+function isPathIgnored(path, ignore) {
+  const endsWith = (element) => path.endsWith(`${element  }/package.json`);
+  const ignoreArray = ignore.split(', ');
+  return ignoreArray.some(endsWith);
 }
 
 run();
